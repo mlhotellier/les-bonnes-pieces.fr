@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<title>Les Bonnes Pièces</title>
+		<link rel="stylesheet" href="styles.css">
+		<script type="module" src="pieces.js"></script>
+	</head>
+	<body>
+		<header>
+			<img src="images/logo-les-bonnes-pieces.png" alt="LOGO">
+			<h1>Les Bonnes Pièces</h1>
+		</header>
+		<main>
+			<!-- Menu de recherche -->
+			<section class="filtres">
+				<h3>Filtres</h3>
+				<button class="btn-trier">Trier par prix croissant</button>
+				<br>
+				<button class="btn-decroissant">Trier par prix décroissant</button>
+				<br>
+				<button class="btn-filtrer">Filter par prix -35 € </button>
+				<br>
+				<button class="btn-nodesc">Filtrer les pièces avec description</button>
+				<br>
+				<p>Prix maximum :</p>
+				<input name="prix-max" id="prix-max" type="range" min="0" max="60" step="5">
+			</section>
+
+			<!-- Fiches produits -->
+			<section class="fiches">
+				<div class="abordables">
+				</div>
+				<div class="disponibles">
+				</div>
+			</section>
+		</main>
+	</body>
+</html>
