@@ -1,4 +1,4 @@
-import { ajoutListenersAvis, ajoutListenerEnvoyerAvis, afficherAvis } from "./avis.js";
+import { ajoutListenersAvis, ajoutListenerEnvoyerAvis, afficherAvis, afficherGraphiqueAvis } from "./avis.js";
 
 // Récupération des pièces éventuellement stockées dans le localStorage
 let pieces = window.localStorage.getItem("pieces");
@@ -67,7 +67,7 @@ for(let i=0; i< pieces.length; i++){
     const avis = JSON.parse(avisJSON)
 
     if(avis != null){
-        const pieceElement = document.querySelector(`article[data-id:"${id}]`);
+        const pieceElement = document.querySelector(`article[data-id="${id}"]`);
         afficherAvis(pieceElement,avis)
     }
 }
@@ -117,7 +117,7 @@ boutonNoDescription.addEventListener("click", function () {
 
 
 // // Liste des pièces abordables
-// const noms = pieces.map(piece => piece.nom);
+const noms = pieces.map(piece => piece.nom);
 // for(let i = pieces.length -1 ; i >= 0; i--){
 //     if(pieces[i].prix > 35){
 //         noms.splice(i,1)
@@ -192,3 +192,6 @@ localStorage.setItem('prix_indisponibles', JSON.stringify(prixIndisponibles));
 inputPrixMax.addEventListener('input', function(){
     localStorage.setItem('prix_max', inputPrixMax.value);
 });
+
+// Appel à la fonction pour afficher le premier graphique
+await afficherGraphiqueAvis();
