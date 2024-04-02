@@ -1,40 +1,42 @@
+/* global Chart */
+
 export function ajoutListenersAvis() {
   const piecesElements = document.querySelectorAll(".fiches article button");
-
   for (let i = 0; i < piecesElements.length; i++) {
-      piecesElements[i].addEventListener("click", async function (event) {
-          const id = event.target.dataset.id;
-          const pieceElement = event.target.parentElement;
-          
-          if (piecesElements[i].innerText === "Afficher les avis") {
-              let avisJSON = window.localStorage.getItem(`avis-piece-${id}`);
-              if (!avisJSON) {
-                  const reponse = await fetch("http://localhost:8081/pieces/" + id + "/avis");
-                  const avis = await reponse.json();
-                  window.localStorage.setItem(`avis-piece-${id}`, JSON.stringify(avis));
-                  avisJSON = JSON.stringify(avis);
-              }
+    piecesElements[i].addEventListener("click", async function (event) {
+      const id = event.target.dataset.id;
+      const pieceElement = event.target.parentElement;
 
-              const avis = JSON.parse(avisJSON);
-              
-              if (avis) {
-                  afficherAvis(pieceElement, avis);
-                  piecesElements[i].innerText = "Fermer les avis";
-              }
-          } else {
-              supprimerAvis(pieceElement); // Appel de la fonction pour supprimer l'avis
-              piecesElements[i].innerText = "Afficher les avis";
-          }
-      });
+      if (piecesElements[i].innerText === "Afficher les avis") {
+        let avisJSON = window.localStorage.getItem(`avis-piece-${id}`);
+        if (!avisJSON) {
+          const reponse = await fetch(
+            "http://localhost:8081/pieces/" + id + "/avis"
+          );
+          const avis = await reponse.json();
+          window.localStorage.setItem(`avis-piece-${id}`, JSON.stringify(avis));
+          avisJSON = JSON.stringify(avis);
+        }
+
+        const avis = JSON.parse(avisJSON);
+
+        if (avis) {
+          afficherAvis(pieceElement, avis);
+          piecesElements[i].innerText = "Fermer les avis";
+        }
+      } else {
+        supprimerAvis(pieceElement); // Appel de la fonction pour supprimer l'avis
+        piecesElements[i].innerText = "Afficher les avis";
+      }
+    });
   }
 }
-
 
 export function afficherAvis(pieceElement, avis) {
   const avisElement = document.createElement("p");
   avisElement.classList.add("avis"); // Ajoute une classe pour identifier les éléments d'avis
   for (let i = 0; i < avis.length; i++) {
-      avisElement.innerHTML += `<b>${avis[i].utilisateur}:</b> ${avis[i].commentaire} <br>`;
+    avisElement.innerHTML += `<b>${avis[i].utilisateur}:</b> ${avis[i].commentaire} <br>`;
   }
   pieceElement.appendChild(avisElement);
 }
@@ -43,64 +45,85 @@ export function afficherAvis(pieceElement, avis) {
 function supprimerAvis(pieceElement) {
   const avisElement = pieceElement.querySelector(".avis");
   if (avisElement) {
-      avisElement.remove();
+    avisElement.remove();
   }
 }
 
 export function ajoutListenerEnvoyerAvis() {
   const formulaireAvis = document.querySelector(".formulaire-avis");
   formulaireAvis.addEventListener("submit", function (event) {
-      event.preventDefault();
-      // Création de l’objet du nouvel avis.
-      const avis = {
-          pieceId: parseInt(event.target.querySelector("[name=piece-id]").value),
-          utilisateur: event.target.querySelector("[name=utilisateur]").value,
-          commentaire: event.target.querySelector("[name=commentaire]").value,
-          nbEtoiles: parseInt(event.target.querySelector("[name=nbEtoiles]").value)
-      };
-      // Création de la charge utile au format JSON
-      const chargeUtile = JSON.stringify(avis);
-      // Appel de la fonction fetch avec toutes les informations nécessaires
-      fetch("http://localhost:8081/avis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: chargeUtile
+    event.preventDefault();
+    // Création de l’objet du nouvel avis.
+    const avis = {
+      pieceId: parseInt(event.target.querySelector("[name=piece-id]").value),
+      utilisateur: event.target.querySelector("[name=utilisateur]").value,
+      commentaire: event.target.querySelector("[name=commentaire]").value,
+      nbEtoiles: parseInt(event.target.querySelector("[name=nbEtoiles]").value),
+    };
+    // Création de la charge utile au format JSON
+    const chargeUtile = JSON.stringify(avis);
+    // Appel de la fonction fetch avec toutes les informations nécessaires
+    fetch("http://localhost:8081/avis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: chargeUtile,
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Si la requête a réussi, vous pouvez faire quelque chose comme afficher un message à l'utilisateur
+          console.log("Avis envoyé avec succès !");
+          // Vous pouvez également vider les champs de formulaire ou effectuer d'autres actions nécessaires
+          event.target.reset();
+        } else {
+          // Si la requête échoue, vous pouvez afficher un message d'erreur à l'utilisateur
+          console.error("Échec de l'envoi de l'avis.");
+        }
+      })
+      .catch((error) => {
+        // Gestion des erreurs de la requête fetch, par exemple, problème de réseau, serveur inaccessible, etc.
+        console.error(
+          "Une erreur s'est produite lors de l'envoi de l'avis :",
+          error
+        );
       });
   });
-
 }
 
 export async function afficherGraphiqueAvis() {
   // Calcul du nombre total de commentaires par quantité d'étoiles attribuées
-  const avis = await fetch("http://localhost:8081/avis").then(avis => avis.json());
+  const avis = await fetch("http://localhost:8081/avis").then((avis) =>
+    avis.json()
+  );
   const nb_commentaires = [0, 0, 0, 0, 0];
 
   for (let commentaire of avis) {
-      nb_commentaires[commentaire.nbEtoiles - 1]++;
+    nb_commentaires[commentaire.nbEtoiles - 1]++;
   }
   // Légende qui s'affichera sur la gauche à côté de la barre horizontale
   const labels = ["5", "4", "3", "2", "1"];
   // Données et personnalisation du graphique
   const data = {
-      labels: labels,
-      datasets: [{
-          label: "Étoiles attribuées",
-          data: nb_commentaires.reverse(),
-          backgroundColor: "rgba(255, 230, 0, 1)", // couleur jaune
-      }],
+    labels: labels,
+    datasets: [
+      {
+        label: "Étoiles attribuées",
+        data: nb_commentaires.reverse(),
+        backgroundColor: "rgba(255, 230, 0, 1)", // couleur jaune
+      },
+    ],
   };
   // Objet de configuration final
   const config = {
-      type: "bar",
-      data: data,
-      options: {
-          indexAxis: "y",
-      },
+    type: "bar",
+    data: data,
+    options: {
+      indexAxis: "y",
+    },
   };
   // Rendu du graphique dans l'élément canvas
-  const graphiqueAvis = new Chart(
-      document.querySelector("#graphique-avis"),
-      config,
+  new Chart(
+    document.querySelector("#graphique-avis"),
+    config
   );
 
   // Récupération des pièces depuis le localStorage
@@ -108,39 +131,43 @@ export async function afficherGraphiqueAvis() {
 
   // Vérification si piecesJSON est une chaîne JSON valide
   if (!piecesJSON) {
-      console.error("Aucune donnée trouvée dans localStorage sous la clé 'pieces'.");
-      return;
+    console.error(
+      "Aucune donnée trouvée dans localStorage sous la clé 'pieces'."
+    );
+    return;
   }
 
   let pieces;
 
   try {
-      pieces = JSON.parse(piecesJSON);
+    pieces = JSON.parse(piecesJSON);
   } catch (error) {
-      console.error("Erreur lors de la conversion de la chaîne JSON en objet JavaScript :", error);
-      return;
+    console.error(
+      "Erreur lors de la conversion de la chaîne JSON en objet JavaScript :",
+      error
+    );
+    return;
   }
 
   // Vérification si pieces est bien un tableau
   if (!Array.isArray(pieces)) {
-      console.error("Le contenu de localStorage 'pieces' n'est pas un tableau.");
-      return;
+    console.error("Le contenu de localStorage 'pieces' n'est pas un tableau.");
+    return;
   }
-
 
   // Calcul du nombre de commentaires
   let nbCommentairesDispo = 0;
   let nbCommentairesNonDispo = 0;
 
   for (let i = 0; i < avis.length; i++) {
-    const piece = pieces.find(p => p.id === avis[i].pieceId);
+    const piece = pieces.find((p) => p.id === avis[i].pieceId);
 
     if (piece) {
-        if (piece.disponibilite) {
-            nbCommentairesDispo++;
-        } else {
-            nbCommentairesNonDispo++;
-        }
+      if (piece.disponibilite) {
+        nbCommentairesDispo++;
+      } else {
+        nbCommentairesNonDispo++;
+      }
     }
   }
 
@@ -149,23 +176,22 @@ export async function afficherGraphiqueAvis() {
   // Données et personnalisation du graphique
   const dataDispo = {
     labels: labelsDispo,
-    datasets: [{
+    datasets: [
+      {
         label: "Nb. de commentaires",
-        data: [nbCommentairesDispo,nbCommentairesNonDispo],
-        backgroundColor:"rgba(0,230,0,1)",
-    }],
+        data: [nbCommentairesDispo, nbCommentairesNonDispo],
+        backgroundColor: "rgba(0,230,0,1)",
+      },
+    ],
   };
   // Objet de configuration final
-    const configDispo = {
-      type: "bar",
-      data: dataDispo,
+  const configDispo = {
+    type: "bar",
+    data: dataDispo,
   };
   // Rendu du graphique dans l'élément canvas
-  const graphiqueDispo = new Chart(
-      document.querySelector("#graphique-disponibilite"),
-      configDispo,
+  new Chart(
+    document.querySelector("#graphique-disponibilite"),
+    configDispo
   );
-
-
-
 }
