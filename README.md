@@ -1,7 +1,7 @@
 # Installation
 
 ```bash
-  git clone 
+  git clone https://github.com/mlhotellier/les-bonnes-pieces.fr.git
 ```
 
 ## Installation du backend
